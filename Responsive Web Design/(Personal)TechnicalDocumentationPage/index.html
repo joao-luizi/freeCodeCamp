@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./styles.css">
+    <title>Technical Documentation Page</title>
+  </head>
+  <body>
+    <nav id="navbar">
+      <header>
+        <h1>This is my technical document's topic</h1>
+      </header>
+      <ul>
+        <li><a class="nav-link" href="#Overview_of_Synchronization">Overview of Synchronization</a></li>
+        <li><a class="nav-link" href="#Semaphores">Semaphores</a></li>
+        <li><a class="nav-link" href="#Mutexes">Mutexes</a></li>
+        <li><a class="nav-link" href="#Comparison_of_Semaphores_and_Mutexes">Comparison of Semaphores and Mutexes</a></li>
+        <li><a class="nav-link" href="#The_Dining_Philosophers_Problem">The Dining Philosophers Problem</a></li>
+      </ul>
+    </nav>
+    <main id="main-doc">
+      <section id="Overview_of_Synchronization" class="main-section">
+        <header>
+          <h2>Overview of Synchronization</h2>
+        </header>
+        <p>Synchronization is a key concept in concurrent programming that ensures multiple threads or processes can work together without conflicting with each other. It prevents issues like race conditions, where the outcome depends on the unpredictable timing of thread execution.</p>
+        <p>Semaphores and mutexes are used to control access to shared resources, making sure that only one thread can access a critical section at a time, or in the case of semaphores, controlling access to a finite number of resources.</p>
+        <pre><code>// Example: Semaphore controlling access to a shared resource
+      sem_t semaphore;
+      sem_init(&semaphore, 0, 1); // Initializing semaphore with value 1 (binary semaphore)
+      sem_wait(&semaphore); // Wait (lock)
+      sem_post(&semaphore); // Signal (unlock)</code></pre>
+        <ul>
+          <li>Helps avoid race conditions</li>
+          <li>Allows threads to safely access shared resources</li>
+          <li>Enables synchronization of thread execution order</li>
+        </ul>
+      </section>
+      <section id="Semaphores" class="main-section">
+        <header>
+          <h2>Semaphores</h2>
+        </header>
+        <p>A semaphore is a synchronization primitive used to control access to a shared resource in a concurrent system. It is essentially a counter that can be used to signal or wait for certain conditions to be met before proceeding.</p>
+        <p>Semaphores are often used in scenarios where multiple threads need to access a limited resource, such as a pool of database connections or available slots in a buffer. There are two main types of semaphores:</p>
+        <ul>
+          <li><strong>Counting Semaphore:</strong> A general semaphore that allows access up to a specified limit (e.g., controlling access to a pool of 5 database connections).</li>
+          <li><strong>Binary Semaphore:</strong> A special case of counting semaphore where the value is either 0 or 1, often used for mutual exclusion, similar to a mutex.</li>
+        </ul>
+        <p>The basic operations of a semaphore are:</p>
+        <ul>
+          <li><strong>wait()</strong>: Decreases the semaphore's value and waits if the value is 0.</li>
+          <li><strong>signal() -- or POST() --</strong>: Increases the semaphore's value, potentially waking up a waiting thread.</li>
+        </ul>
+        
+        <h3>Code Example: Using a Binary Semaphore</h3>
+        <pre><code>
+      #include &lt;semaphore.h&gt;
+      #include &lt;pthread.h&gt;
+      
+      sem_t semaphore; // Declare a semaphore
+      
+      void* thread_function(void* arg) {
+          sem_wait(&semaphore); // Wait for the semaphore (decreases value)
+      
+          // Critical section: safely access shared resource
+          printf("Thread %d is working...\n", *((int*)arg));
+      
+          sem_post(&semaphore); // Signal (increase value), releasing the semaphore
+          return NULL;
+      }
+      
+      int main() {
+          pthread_t threads[5];
+          int thread_ids[5];
+      
+          // Initialize binary semaphore with value 1 (mutex behavior)
+          sem_init(&semaphore, 0, 1);
+      
+          // Create threads
+          for (int i = 0; i < 5; i++) {
+              thread_ids[i] = i + 1;
+              pthread_create(&threads[i], NULL, thread_function, (void*)&thread_ids[i]);
+          }
+      
+          // Join threads
+          for (int i = 0; i < 5; i++) {
+              pthread_join(threads[i], NULL);
+          }
+      
+          sem_destroy(&semaphore); // Clean up the semaphore
+          return 0;
+      }
+        </code></pre>
+        
+        <p>This code demonstrates the use of a binary semaphore to ensure that only one thread at a time can access the critical section, preventing race conditions.</p>
+        
+        <h3>Key Points:</h3>
+        <ul>
+          <li>Semaphores help prevent race conditions by controlling access to shared resources.</li>
+          <li>A binary semaphore works similarly to a mutex but can be used for simpler signaling.</li>
+          <li>Semaphores can be used for counting and controlling access to multiple instances of a resource.</li>
+        </ul>
+      </section>
+      <section id="Mutexes" class="main-section">
+        <header>
+          <h2>Mutexes</h2>
+        </header>
+        <p>A <strong>mutex</strong> (short for "mutual exclusion") is a synchronization primitive used to protect shared resources from being accessed simultaneously by multiple threads. It ensures that only one thread can access a critical section at a time, preventing race conditions.</p>
+        
+        <p>Unlike semaphores, which are signaling mechanisms and can be used for various synchronization tasks, mutexes are specifically designed for mutual exclusion. When a thread locks a mutex, other threads attempting to lock it will be blocked until the mutex is unlocked by the owning thread.</p>
+        
+        <p>Mutexes are often used when threads need to work with shared data, such as when updating a global variable, accessing a shared file, or interacting with a shared resource that requires exclusive access.</p>
+        
+        <h3>Code Example: Using a Mutex</h3>
+        <pre><code>
+      #include &lt;pthread.h&gt;
+      #include &lt;stdio.h&gt;
+      
+      pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; // Declare and initialize a mutex
+      
+      void* thread_function(void* arg) {
+          pthread_mutex_lock(&mutex); // Lock the mutex (enter critical section)
+      
+          // Critical section: safely access shared resource
+          printf("Thread %d is working with the resource...\n", *((int*)arg));
+      
+          pthread_mutex_unlock(&mutex); // Unlock the mutex (exit critical section)
+          return NULL;
+      }
+      
+      int main() {
+          pthread_t threads[5];
+          int thread_ids[5];
+      
+          // Create threads
+          for (int i = 0; i < 5; i++) {
+              thread_ids[i] = i + 1;
+              pthread_create(&threads[i], NULL, thread_function, (void*)&thread_ids[i]);
+          }
+      
+          // Join threads
+          for (int i = 0; i < 5; i++) {
+              pthread_join(threads[i], NULL);
+          }
+      
+          pthread_mutex_destroy(&mutex); // Clean up the mutex
+          return 0;
+      }
+        </code></pre>
+      
+        <p>This code demonstrates the use of a mutex to ensure that only one thread at a time can access the critical section, even when multiple threads are created.</p>
+        
+        <h3>Key Points:</h3>
+        <ul>
+          <li>Mutexes provide mutual exclusion, ensuring that only one thread can access a resource at a time.</li>
+          <li>They are specifically used for locking critical sections where data integrity must be maintained.</li>
+          <li>Mutexes are more restrictive than semaphores in that only the thread that locks the mutex can unlock it.</li>
+          <li>Mutexes can help prevent race conditions and data corruption in multi-threaded programs.</li>
+        </ul>
+      </section>
+      <section id="Comparison_of_Semaphores_and_Mutexes" class="main-section">
+        <header>
+          <h2>Comparison of Semaphores and Mutexes</h2>
+        </header>
+        <p>Both semaphores and mutexes are synchronization primitives used in multi-threaded programming to prevent race conditions and ensure safe access to shared resources. While they share some similarities, they differ in their behavior and intended use cases. Here, we'll explore the key differences between semaphores and mutexes.</p>
+        
+        <h3>Key Differences</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Semaphore</th>
+              <th>Mutex</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Purpose</strong></td>
+              <td>Control access to a shared resource by multiple threads; can be used for signaling between threads.</td>
+              <td>Ensure that only one thread at a time can access a critical section (mutual exclusion).</td>
+            </tr>
+            <tr>
+              <td><strong>Count</strong></td>
+              <td>Can have any non-negative integer value. A binary semaphore (value 0 or 1) can behave like a mutex.</td>
+              <td>Only two states: locked (1) or unlocked (0). It is binary in nature.</td>
+            </tr>
+            <tr>
+              <td><strong>Ownership</strong></td>
+              <td>Semaphore does not have ownership. Any thread can signal or wait on it.</td>
+              <td>Mutex is owned by the thread that locks it. Only the thread that locks the mutex can unlock it.</td>
+            </tr>
+            <tr>
+              <td><strong>Use Case</strong></td>
+              <td>Used for controlling access to a limited set of resources or signaling between threads.</td>
+              <td>Used for protecting critical sections and ensuring exclusive access to a shared resource.</td>
+            </tr>
+            <tr>
+              <td><strong>Blocking</strong></td>
+              <td>Semaphore can block or signal multiple threads simultaneously (depending on its count).</td>
+              <td>Mutex blocks only the threads trying to acquire it when it’s locked.</td>
+            </tr>
+            <tr>
+              <td><strong>Performance</strong></td>
+              <td>Can be more flexible for complex scenarios (e.g., controlling access to multiple instances of a resource).</td>
+              <td>Often simpler and faster for mutual exclusion in critical sections.</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <h3>When to Use Semaphores vs Mutexes</h3>
+        <p>While both semaphores and mutexes are useful for managing concurrency, they have different purposes:</p>
+        <ul>
+          <li><strong>Use a semaphore:</strong> When you need to control access to a pool of resources (e.g., database connections) or when you need to synchronize multiple threads with a signal.</li>
+          <li><strong>Use a mutex:</strong> When you need to ensure that only one thread at a time can access a critical section or shared resource.</li>
+        </ul>
+        
+        <h3>Example Scenario: Semaphore vs Mutex</h3>
+        <p>Imagine a scenario where you have 5 threads and a shared resource, such as a printer. If you use a semaphore with a count of 5, it allows all 5 threads to access the printer simultaneously. On the other hand, if you use a mutex, only one thread can access the printer at a time, ensuring exclusive access to the resource.</p>
+        
+        <h3>Key Points:</h3>
+        <ul>
+          <li>Semaphores are more flexible and can control access to multiple instances of a resource.</li>
+          <li>Mutexes are stricter and ensure exclusive access to a single resource or critical section.</li>
+          <li>Choosing between semaphores and mutexes depends on the type of synchronization you need: signaling and resource counting vs mutual exclusion.</li>
+        </ul>
+      </section>
+      <section id="The_Dining_Philosophers_Problem" class="main-section">
+        <header>
+          <h2>The Dining Philosophers Problem</h2>
+        </header>
+        <p>The <strong>Dining Philosophers Problem</strong> is a classic synchronization problem that demonstrates the challenges of managing access to shared resources in a concurrent environment. The problem involves five philosophers sitting around a table, each thinking and occasionally eating spaghetti. In order to eat, each philosopher needs two forks, which are shared between neighboring philosophers.</p>
+      
+        <p>The problem illustrates issues such as deadlock, starvation, and race conditions, and provides a great scenario for demonstrating the use of mutexes and semaphores for synchronization.</p>
+      
+        <h3>The Problem Setup</h3>
+        <p>Five philosophers sit around a circular table. Each philosopher has a plate of spaghetti, and there is one fork placed between each pair of neighboring philosophers. A philosopher must pick up both forks to eat, and after eating, they put the forks down for others to use.</p>
+      
+        <p>The challenge is to implement a solution that avoids deadlock (where philosophers are stuck waiting for forks), ensures that all philosophers get to eat, and prevents any philosopher from starving (not getting enough chances to eat).</p>
+      
+        <h3>Using Mutexes in the Dining Philosophers Problem</h3>
+        <p>In the mandatory part of the project, mutexes are used to protect the shared resources (the forks). Each philosopher must lock the mutexes for the two forks they want to pick up before eating and unlock them when finished. This ensures that no two philosophers can access the same fork at the same time, avoiding race conditions.</p>
+        
+        <h3>Using Semaphores in the Dining Philosophers Problem (Bonus Part)</h3>
+        <p>In the bonus part of the project, semaphores are used to limit the number of philosophers that can eat simultaneously. A semaphore is used to signal whether a philosopher can proceed with eating based on the availability of forks. The semaphore controls access to the critical section and ensures that only a limited number of philosophers are eating at any given time, preventing deadlock and starvation.</p>
+      
+        <h3>Code Example: Mutexes in Dining Philosophers</h3>
+        <pre><code>
+      #include &lt;pthread.h&gt;
+      #include &lt;stdio.h&gt;
+      #include &lt;stdlib.h&gt;
+      
+      #define NUM_PHILOSOPHERS 5
+      pthread_mutex_t forks[NUM_PHILOSOPHERS];  // Mutexes for each fork
+      
+      void* philosopher(void* num) {
+          int id = *((int*)num);
+          int left_fork = id;
+          int right_fork = (id + 1) % NUM_PHILOSOPHERS;
+          
+          while (1) {
+              // Think
+              printf("Philosopher %d is thinking...\n", id);
+              
+              // Pick up forks
+              pthread_mutex_lock(&forks[left_fork]);
+              pthread_mutex_lock(&forks[right_fork]);
+              
+              // Eat
+              printf("Philosopher %d is eating...\n", id);
+              
+              // Put down forks
+              pthread_mutex_unlock(&forks[right_fork]);
+              pthread_mutex_unlock(&forks[left_fork]);
+          }
+      }
+    </code></pre>
+    <pre><code>
+      int main() {
+          pthread_t philosophers[NUM_PHILOSOPHERS];
+          int philosopher_ids[NUM_PHILOSOPHERS];
+          
+          // Initialize mutexes for forks
+          for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+              pthread_mutex_init(&forks[i], NULL);
+          }
+      
+          // Create philosopher threads
+          for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+              philosopher_ids[i] = i;
+              pthread_create(&philosophers[i], NULL, philosopher, (void*)&philosopher_ids[i]);
+          }
+      
+          // Join philosopher threads
+          for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+              pthread_join(philosophers[i], NULL);
+          }
+          
+          // Destroy mutexes
+          for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+              pthread_mutex_destroy(&forks[i]);
+          }
+      
+          return 0;
+      }
+        </code></pre>
+        <p>This code demonstrates how mutexes can be used to protect access to the forks and ensure that no two philosophers can pick up the same fork at the same time.</p>
+        
+        <h3>Key Points:</h3>
+        <ul>
+          <li>The Dining Philosophers Problem highlights the challenges of synchronization in concurrent programming.</li>
+          <li>Mutexes are used to prevent race conditions by ensuring that only one philosopher can pick up a fork at a time.</li>
+          <li>Semaphores can be used to control the number of philosophers that can eat simultaneously, preventing deadlock and starvation.</li>
+          <li>The problem is a great way to demonstrate the practical applications of mutexes and semaphores in managing shared resources.</li>
+        </ul>
+      </section>      
+    </main>
+  </body>
+</html>

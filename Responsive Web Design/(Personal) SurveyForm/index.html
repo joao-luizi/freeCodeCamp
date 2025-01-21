@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Survey Form: João Luizi</title>
+</head>
+<body>
+<h1 id = "title">Exploring Middle-earth: A Tolkien Fan Survey</h1>
+<p id="description">The "Exploring Middle-earth: A Tolkien Fan Survey" is a thoughtfully designed form aimed at fans of J.R.R. Tolkien's legendary works. This survey delves into various aspects of the Tolkien legendarium, inviting participants to share their personal journeys, favorite characters, and preferred stories from Middle-earth. It also gathers insights on beloved realms, races, and artifacts, as well as opinions on adaptations and future projects.</p>
+<form id="survey-form" action="submit">
+  
+    <label id ="name-label" for="name" >Name:     <input id = "name" type="text" placeholder="Your name" required/>
+    </label>
+<label id ="email-label"for="email">Email: <input id = "email" type="email" placeholder="Your email" required/>
+</label>
+<label id ="number-label" for="number">Age: <input id = "number" type="number" placeholder="Your age:" min="1" max = "99" required/>
+</label>
+
+<label id ="hero-label"  >Favorite character:     <input id = "name" type="text" placeholder="Character name"/>
+</label>
+
+<label id ="location-label">
+Which realm would you most like to visit?
+</label>
+<select id="dropdown">
+  <option value="shire">The Shire</option>
+<option value="rivendell">Rivendell</option>
+<option value="lothlorien">Lothlórien</option>
+<option value="rohan">Rohan</option>
+<option value="gondor">Gondor</option>
+<option value="mordor">Mordor</option>
+  </select>
+
+<label id ="race-label" class="left-justified">
+Favorite race of Middle-earth?
+</label>
+
+<div class="input-container">
+  <label>Elves</label>
+  <input type="radio" name="race" value="elves">
+</div>
+<div class="input-container">
+  <label>Hobbits</label>
+  <input type="radio" name="race" value="hobbits">
+</div>
+<div class="input-container">
+  <label>Dwarves</label>
+  <input type="radio" name="race" value="dwarves">
+</div>
+<div class="input-container">
+  <label>Men</label>
+  <input type="radio" name="race" value="men">
+</div>
+<div class="input-container">
+  <label>Other</label>
+  <input type="radio" name="race" value="other">
+</div>
+
+<label>Which aspects of Middle-earth do you find most fascinating? (Select all that apply)</label>
+
+<div class="input-container">
+  <label for="the_shire">The Shire: Life of Hobbits and the peaceful lands</label>
+  <input type="checkbox" id="the_shire" name="fandom" value="the_shire">
+</div>
+
+<div class="input-container">
+  <label for="elves">Elves: The immortal race of Middle-earth</label>
+  <input type="checkbox" id="elves" name="fandom" value="elves">
+</div>
+
+<div class="input-container">
+  <label for="dwarves">Dwarves: Masters of stonework and the underground kingdom</label>
+  <input type="checkbox" id="dwarves" name="fandom" value="dwarves">
+</div>
+
+
+<textarea placeholder="Your feedback, comments, or musings..."></textarea>
+<div class="centered">
+  <button id ="submit" type="submit" value="Submit Your Journey">Submit Your Journey</button>
+</div>
+</form>
+</body>
+</html>

@@ -1,0 +1,32 @@
+#image{max-width:100%; height:auto;}
+
+#title
+{
+  text-align: center;
+}
+img{
+  margin:0 auto;
+  display:block;
+  width: 40%;
+  }
+
+#img-div {
+  text-align: center; 
+  margin: 0 auto;     
+}
+
+#img-div img {
+  width: 30%;         
+  margin: 0 auto;     
+  display: block;     
+}
+
+#img-caption {
+  font-size: 14px;    
+  margin-top: 10px;   
+  text-align: center; 
+}
+p 
+{
+  text-align: left;
+}
